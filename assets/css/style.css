@@ -1,0 +1,345 @@
+/* -------------------------------------------------------
+   全局设置 (所有角色共用)
+------------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #F5F8FF;
+    display: flex;
+    height: 100vh;
+}
+
+/* -------- Dashboard 容器布局 -------- */
+.dashboard-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+/* -------------------------------------------------------
+   Sidebar（所有角色共用）
+------------------------------------------------------- */
+.sidebar {
+    width: 240px;
+    background: #1E3A8A;
+    color: white;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.sidebar h2 {
+    font-size: 22px;
+    margin-bottom: 18px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    display: block;
+    transition: 0.25s;
+}
+
+.sidebar a:hover {
+    background: #3B82F6;
+}
+
+.sidebar a.active {
+    background: #2563EB;
+}
+
+.logout-btn {
+    margin-top: auto;
+    background: #DC2626 !important;
+}
+
+/* -------------------------------------------------------
+   Main Content（Dashboard 主体区域）
+------------------------------------------------------- */
+.main-content {
+    flex: 1;
+    padding: 35px;
+}
+
+.main-content h2 {
+    font-size: 26px;
+    margin-bottom: 10px;
+}
+
+.main-content p {
+    font-size: 15px;
+    color: #666;
+}
+
+/* -------------------------------------------------------
+   统计卡片 (Dashboard Cards)
+------------------------------------------------------- */
+.stats-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    flex: 1;
+    padding: 25px;
+    border-radius: 12px;
+    color: white;
+    font-size: 18px;
+}
+
+.stat-card .number {
+    font-size: 36px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+/* 卡片颜色 */
+.blue { background: #3B82F6; }
+.orange { background: #F59E0B; }
+.green { background: #10B981; }
+
+/* -------------------------------------------------------
+   Table 样式（Project List / Feedback / User management）
+------------------------------------------------------- */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 14px;
+    text-align: left;
+}
+
+.styled-table th {
+    background: #1E3A8A;
+    color: white;
+}
+
+.styled-table tr:nth-child(even) {
+    background: #F3F6FF;
+}
+
+.status-underreview { color: #F59E0B; font-weight: bold; }
+.status-completed { color: #10B981; font-weight: bold; }
+.status-pending { color: #6366F1; font-weight: bold; }
+
+/* -------------------------------------------------------
+   通用按钮
+------------------------------------------------------- */
+.btn-primary {
+    display: inline-block;
+    background: #2563EB;
+    color: white;
+    padding: 12px 18px;
+    margin-top: 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+.btn-primary:hover {
+    background: #1D4ED8;
+}
+
+/* -------------------------------------------------------
+   Form (Submit Project / Evaluate Project)
+------------------------------------------------------- */
+.form-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.form-box input,
+.form-box textarea,
+.form-box select {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #CBD5E1;
+}
+
+.form-box .btn {
+    background: #2563EB;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+}
+
+.form-box .btn:hover {
+    background: #1D4ED8;
+}
+
+/* -------------------------------------------------------
+   Admin 模块专属
+------------------------------------------------------- */
+.admin-table-actions a {
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    margin-right: 8px;
+}
+
+.admin-edit { background: #0EA5E9; }
+.admin-delete { background: #DC2626; }
+
+/* -------------------------------------------------------
+   Evaluator 模块专属
+------------------------------------------------------- */
+.evaluator-score {
+    display: flex;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.evaluator-score input {
+    width: 80px;
+}
+
+/* -------------------------------------------------------
+   Login 页面
+------------------------------------------------------- */
+.login-container {
+    width: 400px;
+    margin: auto;
+    margin-top: 80px;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 14px rgba(0,0,0,.08);
+}
+
+.login-container h2 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #CACACA;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 18px;
+    background: #2563EB;
+    border-radius: 8px;
+    color: white;
+    border: none;
+}
+.login-btn:hover {
+    background: #1D4ED8;
+}
+
+/* Center the project form */
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+}
+
+/* Form white card */
+.form-card {
+    width: 550px;
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Form layout */
+.project-form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 18px;
+    color: #374151;
+}
+
+.project-form input,
+.project-form textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.project-form input:focus,
+.project-form textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 5px rgba(37, 99, 235, 0.4);
+}
+
+/* Submit button fills width */
+.btn-primary.full {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+}
+
+/* View Feedback Page */
+.feedback-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.feedback-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,.1);
+}
+
+.feedback-card h3 {
+    font-size: 20px;
+    color: #1e3a8a;
+}
+
+.feedback-score {
+    margin-top: 8px;
+    font-size: 16px;
+    color: #eab308;
+    font-weight: 600;
+}
+
+.feedback-box {
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.no-feedback {
+    margin-top: 30px;
+    font-size: 18px;
+    color: #6b7280;
+    text-align: center;
+}
