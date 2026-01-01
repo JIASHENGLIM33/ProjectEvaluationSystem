@@ -7,9 +7,7 @@ require_once __DIR__ . "/../config/config.php";
 $studentId   = $_SESSION["id"];
 $studentName = $_SESSION["name"];
 
-/* =========================
-   获取学生所有项目
-========================= */
+
 $stmt = $conn->prepare("
     SELECT project_id, title, description, status, created_at
     FROM project

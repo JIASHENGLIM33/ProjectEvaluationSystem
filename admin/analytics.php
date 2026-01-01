@@ -75,12 +75,12 @@ $monthValues = array_map(function($m) use ($monthCounts) { return $monthCounts[$
     <title>Admin Analytics - Project Evaluation</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Chart.js CDN -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="../assets/css/admin.css" />
     <style>
-        /* 仅为 analytics 页面追加少量布局样式（你也可把这段并入 admin.css） */
+
         .analytics-container { padding: 24px; }
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
         .chart-card { background:#fff; padding:16px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
@@ -107,21 +107,21 @@ $monthValues = array_map(function($m) use ($monthCounts) { return $monthCounts[$
     <p class="small-note">Overview: project distribution, evaluator workload, submission trends (last 6 months).</p>
 
     <div class="charts-grid">
-        <!-- 饼图：项目状态分布 -->
+ 
         <div class="chart-card">
             <div class="chart-title">Project Status Distribution</div>
             <canvas id="statusChart" width="400" height="300"></canvas>
             <p class="small-note">Shows how many projects are Pending / Under Review / Completed.</p>
         </div>
 
-        <!-- 柱状图：评审工作量 -->
+
         <div class="chart-card">
             <div class="chart-title">Evaluator Assigned Projects</div>
             <canvas id="evaChart" width="400" height="300"></canvas>
             <p class="small-note">Number of projects assigned to each evaluator.</p>
         </div>
 
-        <!-- 折线图：提交趋势 -->
+
         <div class="chart-card" style="grid-column: 1 / -1;">
             <div class="chart-title">Submissions Trend (Last 6 Months)</div>
             <canvas id="trendChart" width="900" height="250"></canvas>
@@ -131,7 +131,7 @@ $monthValues = array_map(function($m) use ($monthCounts) { return $monthCounts[$
 </div>
 
 <script>
-    // 数据从 PHP 注入到 JS
+
     const statusLabels = <?php echo json_encode($statusLabels); ?>;
     const statusCounts = <?php echo json_encode($statusCounts); ?>;
 
@@ -141,7 +141,7 @@ $monthValues = array_map(function($m) use ($monthCounts) { return $monthCounts[$
     const monthLabels = <?php echo json_encode($monthLabels); ?>;
     const monthValues = <?php echo json_encode($monthValues); ?>;
 
-    // ===== Status Pie Chart =====
+
     const ctxStatus = document.getElementById('statusChart').getContext('2d');
     const statusChart = new Chart(ctxStatus, {
         type: 'doughnut',
@@ -162,7 +162,7 @@ $monthValues = array_map(function($m) use ($monthCounts) { return $monthCounts[$
         }
     });
 
-    // ===== Evaluator Bar Chart =====
+
     const ctxEva = document.getElementById('evaChart').getContext('2d');
     const evaChart = new Chart(ctxEva, {
         type: 'bar',
@@ -186,7 +186,7 @@ $monthValues = array_map(function($m) use ($monthCounts) { return $monthCounts[$
         }
     });
 
-    // ===== Monthly Trend Line Chart =====
+
     const ctxTrend = document.getElementById('trendChart').getContext('2d');
     const trendChart = new Chart(ctxTrend, {
         type: 'line',

@@ -46,9 +46,7 @@ if ($result["status"] === "Inactive") {
     exit;
 }
 
-/* =========================
-   4. 软禁用 evaluator（不删除）
-========================= */
+
 $stmt = $conn->prepare("
     UPDATE evaluator
     SET status = 'Inactive'
@@ -57,13 +55,11 @@ $stmt = $conn->prepare("
 $stmt->bind_param("i", $evaluatorId);
 
 if (!$stmt->execute()) {
-    // 理论上不会失败，但防御式处理
+
     header("Location: manage_evaluators.php?error=update_failed");
     exit;
 }
 
-/* =========================
-   5. 成功返回
-========================= */
+
 header("Location: manage_evaluators.php?disabled=1");
 exit;

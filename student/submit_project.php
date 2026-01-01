@@ -10,9 +10,7 @@ $studentName = $_SESSION["name"];
 $error   = "";
 $success = "";
 
-/* =========================
-   Upload helper
-========================= */
+
 function uploadFile($input, $folder, $allowedExt, $maxMB = 50) {
     if (!isset($_FILES[$input]) || $_FILES[$input]["error"] !== UPLOAD_ERR_OK) {
         return null;
@@ -42,9 +40,7 @@ function uploadFile($input, $folder, $allowedExt, $maxMB = 50) {
     return "uploads/{$folder}/" . $safeName;
 }
 
-/* =========================
-   Handle submission
-========================= */
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $title       = trim($_POST["title"] ?? "");

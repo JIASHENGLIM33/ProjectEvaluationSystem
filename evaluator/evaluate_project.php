@@ -1,8 +1,5 @@
 <?php
-/*************************************************
- * evaluator/evaluate_project.php
- * FINAL – Multi-Evaluator + AI Feedback Version
- *************************************************/
+
 
 require_once __DIR__ . "/../config/auth_check.php";
 allow_role("evaluator");
@@ -11,17 +8,13 @@ require_once __DIR__ . "/../config/config.php";
 
 $evaluatorId = $_SESSION["id"];
 
-/* =========================
-   Get project_id
-========================= */
+
 $projectId = intval($_GET["project_id"] ?? 0);
 if ($projectId <= 0) {
     die("Invalid project ID.");
 }
 
-/* =========================
-   Fetch project + assignment
-========================= */
+
 $stmt = $conn->prepare("
     SELECT
         p.project_id,
@@ -49,9 +42,7 @@ if (!$project) {
     die("Access denied or project not assigned to you.");
 }
 
-/* =========================
-   Prevent duplicate evaluation
-========================= */
+
 $check = $conn->prepare("
     SELECT evaluation_id
     FROM evaluation
@@ -65,17 +56,13 @@ if ($check->get_result()->num_rows > 0) {
     die("You have already evaluated this project.");
 }
 
-/* =========================
-   Utility Functions
-========================= */
+
 function normalizeScore(float $raw, float $max): float {
     if ($max <= 0) return 0;
     return round(($raw / $max) * 100, 2);
 }
 
-/* =========================
-   Handle Submission
-========================= */
+
 $error = "";
 $success = "";
 
@@ -85,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         return isset($_POST[$key]) ? floatval($_POST[$key]) : 0;
     }
 
-    /* ---------- TA (60) ---------- */
+
     $taRaw =
         score('ta_usefulness')   / 10 * 5 +
         score('ta_creative')     / 10 * 2 +
@@ -101,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         score('ta_completion')   / 10 * 5 +
         score('ta_problem')      / 10 * 5;
 
-    /* ---------- PR (100) ---------- */
+
     $prRaw =
         score('pr_intro')      / 10 * 10 +
         score('pr_analysis')   / 10 * 20 +
@@ -109,14 +96,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         score('pr_testing')    / 10 * 20 +
         score('pr_conclusion') / 10 * 10;
 
-    /* ---------- P (100) ---------- */
+
     $pRaw =
         score('p_preparation') / 10 * 20 +
         score('p_slides')      / 10 * 20 +
         score('p_content')     / 10 * 30 +
         score('p_qa')          / 10 * 30;
 
-    /* ---------- Final Score ---------- */
+
     $finalScore = round(
         normalizeScore($taRaw, 60) * 0.60 +
         normalizeScore($prRaw, 100) * 0.20 +
@@ -154,9 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($stmt->execute()) {
 
-            /* =========================
-               Check completion status
-            ========================= */
+
             $assigned = $conn->prepare("
                 SELECT COUNT(*) AS total
                 FROM assignment
@@ -177,7 +162,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if ($doneEvaluations >= $totalEvaluators) {
 
-    // 所有 evaluator 已完成 → Completed
+
     $stmtStatus = $conn->prepare("
         UPDATE project
         SET status = 'Completed'
@@ -188,7 +173,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 } else {
 
-    // 仍有 evaluator 未完成 → Under Review
+
     $stmtStatus = $conn->prepare("
         UPDATE project
         SET status = 'Under Review'

@@ -1,8 +1,5 @@
 <?php
-/*************************************************
- * admin/auto_assign.php
- * FINAL – Manual + Fuzzy AI Auto Assign
- *************************************************/
+
 
 require_once __DIR__ . "/../config/auth_check.php";
 allow_role("admin");
@@ -11,17 +8,12 @@ require_once __DIR__ . "/../config/config.php";
 
 $adminId = $_SESSION["id"];
 
-/* =========================
-   1. Only allow POST
-========================= */
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: assign_project.php");
     exit;
 }
 
-/* =========================
-   2. Read parameters
-========================= */
+
 $projectId   = intval($_POST["project_id"] ?? 0);
 $evaluatorId = intval($_POST["evaluator_id"] ?? 0); // optional
 
@@ -29,9 +21,7 @@ if ($projectId <= 0) {
     die("Invalid project ID.");
 }
 
-/* =========================
-   3. Prevent duplicate assignment
-========================= */
+
 $check = $conn->prepare("
     SELECT assignment_id
     FROM assignment
@@ -44,9 +34,7 @@ if ($check->get_result()->num_rows > 0) {
     die("This project has already been assigned.");
 }
 
-/* ======================================================
-   MODE A: MANUAL ASSIGN (UNCHANGED)
-====================================================== */
+
 if ($evaluatorId > 0) {
 
     $stmt = $conn->prepare("
@@ -61,14 +49,10 @@ if ($evaluatorId > 0) {
     }
 
 }
-/* ======================================================
-   MODE B: AUTO ASSIGN (FUZZY LOGIC + AI)
-====================================================== */
+
 else {
 
-    /* =========================
-       FUZZY FUNCTIONS
-    ========================= */
+
     function fuzzyLow($x) {
         return ($x <= 0) ? 1 : (($x >= 40) ? 0 : (1 - $x / 40));
     }
@@ -114,9 +98,7 @@ else {
         return round((0.7 * $fuzzyScore) + (0.3 * $workloadPenalty), 2);
     }
 
-    /* =========================
-       Fetch project
-    ========================= */
+
     $p = $conn->query("
         SELECT category
         FROM project
@@ -129,9 +111,7 @@ else {
 
     $category = strtolower($p["category"]);
 
-    /* =========================
-       Fetch evaluators
-    ========================= */
+
     $evs = $conn->query("
         SELECT 
             e.evaluator_id,
@@ -175,7 +155,6 @@ GROUP BY e.evaluator_id
 
     usort($ranked, fn($a, $b) => $b["score"] <=> $a["score"]);
 
-    /* Assign 1 or 2 evaluators */
     $count    = count($ranked) >= 2 ? rand(1, 2) : 1;
     $selected = array_slice($ranked, 0, $count);
     $weight   = ($count === 2) ? 0.50 : 1.00;
@@ -192,9 +171,6 @@ GROUP BY e.evaluator_id
     }
 }
 
-/* =========================
-   4. Update project status
-========================= */
 $upd = $conn->prepare("
     UPDATE project
     SET status = 'Under Review'
@@ -203,8 +179,6 @@ $upd = $conn->prepare("
 $upd->bind_param("i", $projectId);
 $upd->execute();
 
-/* =========================
-   5. Redirect
-========================= */
+
 header("Location: assign_project.php?success=1");
 exit;

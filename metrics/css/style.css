@@ -58,7 +58,7 @@ a {
     margin-bottom: 1em;
 }
 
-/* Re-overiding the width 100% declaration to match size of% based container */
+
 .navigation .container {
     padding-bottom: 0;
     padding-top: 0;

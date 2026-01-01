@@ -1,8 +1,5 @@
 <?php
-/*************************************************
- * student/view_feedback.php
- * FINAL VERSION
- *************************************************/
+
 
 require_once __DIR__ . "/../config/auth_check.php";
 allow_role("student");
@@ -11,9 +8,7 @@ require_once __DIR__ . "/../config/config.php";
 
 $studentId = $_SESSION["id"];
 
-/* =========================
-   1. 获取该学生的所有项目
-========================= */
+
 $stmt = $conn->prepare("
     SELECT project_id, title, description, status
     FROM project
@@ -24,12 +19,10 @@ $stmt->bind_param("i", $studentId);
 $stmt->execute();
 $projects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-/* 默认选中第一个项目 */
+
 $selectedProjectId = $_GET["project_id"] ?? ($projects[0]["project_id"] ?? null);
 
-/* =========================
-   2. 获取该项目的评估结果（如果有）
-========================= */
+
 $feedback = null;
 
 if ($selectedProjectId) {
@@ -67,7 +60,7 @@ if ($selectedProjectId) {
 
     <div class="grid grid-cols-3 gap-6">
 
-        <!-- ================= 左侧：项目列表 ================= -->
+
         <div class="col-span-1 border-r pr-4">
             <h3 class="font-semibold mb-3">Your Projects</h3>
 
@@ -101,7 +94,7 @@ if ($selectedProjectId) {
             <?php endforeach; ?>
         </div>
 
-        <!-- ================= 右侧：Feedback ================= -->
+
         <div class="col-span-2 pl-4">
 
             <?php if (!$selectedProjectId): ?>

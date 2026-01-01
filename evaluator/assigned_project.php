@@ -1,8 +1,5 @@
 <?php
-/*************************************************
- * evaluator/assigned_project.php
- * LIST ASSIGNED PROJECTS (NO project_id REQUIRED)
- *************************************************/
+
 
 require_once __DIR__ . "/../config/auth_check.php";
 allow_role("evaluator");
@@ -11,9 +8,7 @@ require_once __DIR__ . "/../config/config.php";
 
 $evaluatorId = $_SESSION["id"];
 
-/* =========================================================
-   Fetch assigned projects
-========================================================= */
+
 $stmt = $conn->prepare("
     SELECT 
         p.project_id,

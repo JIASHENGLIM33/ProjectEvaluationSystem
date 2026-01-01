@@ -4,7 +4,7 @@ require_once "../config/auth_check.php";
 
 allow_role("admin");
 
-// 读取所有学生
+
 $students = $conn->query("
     SELECT student_id, name, email, program, intake, created_at
     FROM student

@@ -6,9 +6,7 @@ require_once __DIR__ . "/../config/config.php";
 $studentId   = $_SESSION["id"];
 $studentName = $_SESSION["name"];
 
-/* =========================
-   获取学生项目
-========================= */
+
 $stmt = $conn->prepare("
     SELECT project_id, title, status, created_at
     FROM project
@@ -19,9 +17,7 @@ $stmt->bind_param("i", $studentId);
 $stmt->execute();
 $projects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-/* =========================
-   Student Average Score
-========================= */
+
 $stmt = $conn->prepare("
     SELECT ROUND(AVG(e.score), 1) AS avg_score
     FROM evaluation e
@@ -32,9 +28,7 @@ $stmt->bind_param("i", $studentId);
 $stmt->execute();
 $averageScore = $stmt->get_result()->fetch_assoc()["avg_score"];
 
-/* =========================
-   Chart Data
-========================= */
+
 $stmt = $conn->prepare("
     SELECT p.title, e.score
     FROM evaluation e
@@ -53,9 +47,7 @@ foreach ($rows as $r) {
     $chartScores[] = $r["score"];
 }
 
-/* =========================
-   统计
-========================= */
+
 $totalProjects = count($projects);
 $completed     = count(array_filter($projects, fn($p) => $p['status'] === 'Completed'));
 $underReview   = count(array_filter($projects, fn($p) => $p['status'] === 'Under Review'));

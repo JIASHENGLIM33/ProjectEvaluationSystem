@@ -1,24 +1,18 @@
 <?php
-/*************************************************
- * login.php  (FINAL – LOGIN + REGISTER ENTRY)
- *************************************************/
 
-session_start(); // ✅ 只 start，不 destroy
+
+session_start();
 require_once __DIR__ . "/config/config.php";
 
 $error = "";
 $success = "";
 
-/* =========================
-   显示注册成功提示
-========================= */
+
 if (isset($_GET["registered"])) {
     $success = "Registration successful. Please login.";
 }
 
-/* =========================
-   处理登录请求
-========================= */
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $email    = trim($_POST["email"] ?? "");
@@ -30,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $user = null;
 
-        /* ---------- 查 Admin ---------- */
+
         $stmt = $conn->prepare("
             SELECT admin_id AS id, name, email, password, 'admin' AS role
             FROM administrator
@@ -40,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
 
-        /* ---------- 查 Evaluator ---------- */
+ 
         if (!$user) {
             $stmt = $conn->prepare("
                 SELECT evaluator_id AS id, name, email, password, 'evaluator' AS role
@@ -52,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $user = $stmt->get_result()->fetch_assoc();
         }
 
-        /* ---------- 查 Student ---------- */
+
         if (!$user) {
             $stmt = $conn->prepare("
                 SELECT student_id AS id, name, email, password, 'student' AS role
@@ -64,22 +58,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $user = $stmt->get_result()->fetch_assoc();
         }
 
-        /* ---------- 验证 ---------- */
+
         if (!$user) {
             $error = "User not found.";
         } else {
 
             $passwordCorrect =
                 password_verify($password, $user["password"]) ||
-                $password === $user["password"]; // 兼容旧明文数据
-
+                $password === $user["password"];
             if (!$passwordCorrect) {
                 $error = "Incorrect password.";
             } else {
 
-                /* =========================
-                   登录成功
-                ========================= */
+
                 session_regenerate_id(true);
 
                 $_SESSION["id"]    = $user["id"];

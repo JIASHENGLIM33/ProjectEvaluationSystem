@@ -5,9 +5,7 @@ allow_role("admin");
 require_once __DIR__ . "/../config/config.php";
 require_once __DIR__ . "/../ai_matcher.php";
 
-/* =========================
-   获取 project
-========================= */
+
 if (!isset($_GET['project_id'])) {
     die("Project not specified.");
 }
@@ -28,9 +26,6 @@ if (!$project) {
     die("Project not found.");
 }
 
-/* =========================
-检查是否已分配
-========================= */
 $check = $conn->prepare("
     SELECT * FROM assignment WHERE project_id = ?
 ");
@@ -41,9 +36,7 @@ if ($check->get_result()->num_rows > 0) {
     die("Evaluator already assigned for this project.");
 }
 
-/* =========================
-获取 evaluators
-========================= */
+
 $evaluators = [];
 $res = $conn->query("
     SELECT evaluator_id, name, expertise
@@ -54,9 +47,7 @@ while ($row = $res->fetch_assoc()) {
     $evaluators[] = $row;
 }
 
-/* =========================
-AI MATCHING
-========================= */
+
 $projectText = $project['title'] . " " . $project['description'];
 
 $projectEmbedding = create_embedding($projectText);
@@ -74,10 +65,10 @@ foreach ($evaluators as $ev) {
     ];
 }
 
-/* 按匹配度排序 */
+
 usort($rankedEvaluators, fn($a, $b) => $b['score'] <=> $a['score']);
 
-/* 推荐前 3 名 */
+
 $topEvaluators = array_slice($rankedEvaluators, 0, 3);
 ?>
 <!DOCTYPE html>
@@ -125,9 +116,7 @@ $topEvaluators = array_slice($rankedEvaluators, 0, 3);
 </html>
 
 <?php
-/* =========================
-处理 assignment
-========================= */
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign'])) {
 
     $evaluatorId = intval($_POST['evaluator_id']);

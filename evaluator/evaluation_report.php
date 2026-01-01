@@ -1,16 +1,11 @@
 <?php
-/*************************************************
- * admin/evaluation_report.php
- * FULL – PART A + PART B
- *************************************************/
+
 require_once __DIR__ . "/../config/auth_check.php";
 allow_role("admin");
 
 require_once __DIR__ . "/../config/config.php";
 
-/* =========================
-   AI Feedback Helper
-========================= */
+
 function generateAIFeedback(array $rubric, int $totalScore): string {
     if ($totalScore >= 85) return "Consistently high-quality evaluations indicating strong assessment alignment.";
     if ($totalScore >= 70) return "Generally balanced evaluations with good judgment.";
@@ -19,9 +14,7 @@ function generateAIFeedback(array $rubric, int $totalScore): string {
     return "Evaluation quality is significantly below expectations.";
 }
 
-/* =========================
-   Fetch evaluator summary
-========================= */
+
 $evaluators = $conn->query("
     SELECT 
         ev.evaluator_id,
@@ -67,9 +60,7 @@ $evaluators = $conn->query("
 <?php while ($ev = $evaluators->fetch_assoc()): ?>
 
 <?php
-/* =========================
-   Get evaluator rubric data
-========================= */
+
 $rubs = $conn->prepare("
     SELECT rubric_json, score
     FROM evaluation

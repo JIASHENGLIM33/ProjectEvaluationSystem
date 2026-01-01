@@ -18,11 +18,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "All fields are required.";
     } else {
 
-        // ✅ 自动生成初始密码（8 位）
+
         $rawPassword = substr(bin2hex(random_bytes(4)), 0, 8);
         $hashedPwd   = password_hash($rawPassword, PASSWORD_DEFAULT);
 
-        // 1️⃣ 插入 student 表（hash 密码）
+
         $stmt = $conn->prepare("
             INSERT INTO student (name, email, password, program, intake, created_at)
             VALUES (?, ?, ?, ?, ?, NOW())
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($stmt->execute()) {
 
-            // 2️⃣ 同时存一份账号清单（明文密码，仅 Admin 用）
+
             $log = $conn->prepare("
                 INSERT INTO student_credentials (student_name, email, raw_password, created_at)
                 VALUES (?, ?, ?, NOW())

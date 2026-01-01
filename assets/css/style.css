@@ -1,4 +1,4 @@
-/* 全局样式 */
+
 *,
 *::before,
 *::after {
@@ -15,7 +15,7 @@ body {
     min-height: 100vh;
 }
 
-/* 居中页面内容 */
+
 .page-wrapper {
     min-height: 100vh;
     display: flex;
@@ -24,7 +24,7 @@ body {
     padding: 24px;
 }
 
-/* 登录卡片 */
+
 .login-card {
     background-color: #ffffff;
     border-radius: 24px;
@@ -35,7 +35,7 @@ body {
     text-align: center;
 }
 
-/* 顶部图标 */
+
 .icon-wrapper {
     width: 64px;
     height: 64px;
@@ -65,7 +65,7 @@ body {
     margin-bottom: 24px;
 }
 
-/* 表单 */
+
 .form {
     text-align: left;
 }
@@ -101,7 +101,7 @@ body {
     box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
 }
 
-/* 主按钮 */
+
 .btn-primary {
     width: 100%;
     margin-top: 8px;
@@ -124,7 +124,7 @@ body {
     transform: translateY(1px);
 }
 
-/* 表单信息提示 */
+
 .form-message {
     margin-top: 10px;
     font-size: 13px;
@@ -139,7 +139,7 @@ body {
     color: #16a34a;
 }
 
-/* “Need help?” 链接按钮 */
+
 .link-button {
     margin-top: 18px;
     border: none;
@@ -159,7 +159,6 @@ body {
     color: #374151;
 }
 
-/* 小屏幕适配 */
 @media (max-width: 480px) {
     .login-card {
         padding: 24px 20px 20px;

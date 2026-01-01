@@ -1,5 +1,5 @@
 <?php
-// includes/fuzzy_logic.php
+
 
 function calculateFuzzyScore(int $rawScore): int {
     if ($rawScore >= 85) return 95;

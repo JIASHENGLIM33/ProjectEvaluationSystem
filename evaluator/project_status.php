@@ -7,9 +7,7 @@ require_once __DIR__ . "/../config/config.php";
 $evaluatorId   = $_SESSION["id"];
 $evaluatorName = $_SESSION["name"];
 
-/* =========================
-   获取该 evaluator 的项目
-========================= */
+
 $stmt = $conn->prepare("
     SELECT 
         p.project_id,
@@ -31,9 +29,7 @@ $stmt->bind_param("i", $evaluatorId);
 $stmt->execute();
 $projects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-/* =========================
-   统计
-========================= */
+
 $total      = count($projects);
 $pending    = count(array_filter($projects, fn($p) => $p["status"] === "Pending"));
 $underReview= count(array_filter($projects, fn($p) => $p["status"] === "Under Review"));

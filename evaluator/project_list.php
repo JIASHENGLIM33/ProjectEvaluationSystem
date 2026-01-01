@@ -6,7 +6,7 @@ require_once __DIR__ . "/../config/config.php";
 
 $evaluator_id = $_SESSION["id"];
 
-// Fetch projects assigned to this evaluator
+
 $stmt = $conn->prepare("
     SELECT
         p.project_id,

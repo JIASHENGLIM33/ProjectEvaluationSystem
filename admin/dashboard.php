@@ -3,9 +3,7 @@ require_once __DIR__ . "/../config/auth_check.php";
 allow_role("admin");
 require_once __DIR__ . "/../config/config.php";
 
-/* =========================
-   System Stats
-========================= */
+
 $totalStudents = $conn->query("SELECT COUNT(*) c FROM student")->fetch_assoc()["c"];
 $totalEvaluators = $conn->query("SELECT COUNT(*) c FROM evaluator")->fetch_assoc()["c"];
 $totalProjects = $conn->query("SELECT COUNT(*) c FROM project")->fetch_assoc()["c"];
@@ -13,9 +11,7 @@ $completedProjects = $conn->query("
     SELECT COUNT(*) c FROM project WHERE status='Completed'
 ")->fetch_assoc()["c"];
 
-/* =========================
-   Recent Projects + Evaluation
-========================= */
+
 $projects = $conn->query("
     SELECT 
         p.project_id,
@@ -35,9 +31,7 @@ $projects = $conn->query("
     LIMIT 8
 ")->fetch_all(MYSQLI_ASSOC);
 
-/* =========================
-   Evaluator Workload Overview
-========================= */
+
 $evaluators = $conn->query("
     SELECT 
         ev.evaluator_id,
@@ -65,7 +59,7 @@ $evaluators = $conn->query("
 <body class="bg-gray-100">
 <div class="flex">
 
-<!-- Sidebar -->
+
 <aside class="w-64 bg-white shadow h-screen fixed px-6 py-6">
     <h1 class="text-xl font-semibold mb-6 text-blue-600">PEMS Admin</h1>
 
@@ -80,14 +74,11 @@ $evaluators = $conn->query("
     <a href="../logout.php" class="absolute bottom-6 left-6 text-red-600">Logout</a>
 </aside>
 
-<!-- Main -->
 <main class="flex-1 ml-64 p-10">
 
 <h1 class="text-3xl font-semibold mb-6">Admin Dashboard</h1>
 
-<!-- =========================
-     System Stats
-========================= -->
+
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
     <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-500">
         <p class="text-gray-600">Students</p>
@@ -110,9 +101,7 @@ $evaluators = $conn->query("
     </div>
 </div>
 
-<!-- =========================
-     Evaluator Workload
-========================= -->
+
 <div class="bg-white rounded-xl shadow p-6 mb-10">
 <h2 class="text-xl font-semibold mb-4">Evaluator Workload Overview</h2>
 
@@ -153,9 +142,7 @@ $evaluators = $conn->query("
 </div>
 
 
-<!-- =========================
-     Recent Projects
-========================= -->
+
 <div class="bg-white rounded-xl shadow p-6">
 <h2 class="text-xl font-semibold mb-4">Recent Projects</h2>
 

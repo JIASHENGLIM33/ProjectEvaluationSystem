@@ -9,7 +9,7 @@ body {
     align-items: center;
 }
 
-/* Center box */
+
 .login-container {
     width: 100%;
     display: flex;
@@ -25,7 +25,7 @@ body {
     text-align: center;
 }
 
-/* Top icon */
+
 .icon {
     font-size: 45px;
     background: #2563eb;

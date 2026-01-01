@@ -5,9 +5,7 @@ allow_role("admin");
 require_once __DIR__ . "/../config/config.php";
 require_once __DIR__ . "/../ai_matcher.php";
 
-/* =========================
-   获取【尚未分配】的项目
-========================= */
+
 $projects = $conn->query("
     SELECT project_id, title, description, category
     FROM project
@@ -35,7 +33,7 @@ $projects = $conn->query("
 </a>
 
 
-<!-- 一键自动分配 -->
+
 <form action="auto_assign_all.php" method="POST" class="mb-8">
     <button class="px-5 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
         Auto Assign ALL Projects
@@ -51,11 +49,7 @@ $projects = $conn->query("
 <?php while ($p = $projects->fetch_assoc()): ?>
 
 <?php
-/* =========================
-   AI + Rule + Workload Ranking
-========================= */
 
-// 项目 embedding
 $projectText = trim(
     $p["title"] . " " .
     $p["description"] . " " .
@@ -63,7 +57,7 @@ $projectText = trim(
 );
 $projectVec = create_embedding($projectText);
 
-// 获取 evaluator + workload
+
 $evs = $conn->query("
     SELECT 
         ev.evaluator_id,
@@ -81,26 +75,20 @@ $rank = [];
 
 while ($ev = $evs->fetch_assoc()) {
 
-    /* AI 相似度 */
     $skillText = $ev["expertise"] ?? "";
     $skillVec  = create_embedding($skillText);
     $aiScore   = cosine_similarity($projectVec, $skillVec); // 0 ~ 1
 
-/* Rule-based：类别匹配加分（Null-safe） */
-
-// evaluator expertise → array
 $expertiseRaw  = strtolower($skillText ?? '');
 $expertiseList = array_map('trim', explode(',', $expertiseRaw));
 
-// project category → safe string
+
 $categorySafe = strtolower($p['category'] ?? '');
 
-// rule bonus
 $ruleBonus = in_array($categorySafe, $expertiseList, true)
     ? 0.2
     : 0;
 
-    /* Workload penalty */
     $penalty = $ev["workload"] * 0.05;
 
     $finalScore = max($aiScore + $ruleBonus - $penalty, 0);
@@ -113,7 +101,7 @@ $ruleBonus = in_array($categorySafe, $expertiseList, true)
     ];
 }
 
-// 按分数排序
+
 usort($rank, fn($a, $b) => $b["score"] <=> $a["score"]);
 ?>
 
@@ -158,7 +146,7 @@ usort($rank, fn($a, $b) => $b["score"] <=> $a["score"]);
             </td>
 
             <td class="text-center">
-                <!-- 手动 override -->
+
                 <form method="POST" action="auto_assign.php">
                     <input type="hidden" name="project_id" value="<?= $p["project_id"] ?>">
                     <input type="hidden" name="evaluator_id" value="<?= $r["id"] ?>">

@@ -4,18 +4,14 @@ require_once "../config/auth_check.php";
 
 allow_role("admin");
 
-/* =========================
-   Fetch Evaluators (with status)
-========================= */
+
 $result = $conn->query("
     SELECT evaluator_id, name, email, expertise, status, created_at
     FROM evaluator
     ORDER BY status ASC, created_at DESC
 ");
 
-/* =========================
-   Helper for safe output
-========================= */
+
 function e($v) {
     return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8');
 }
@@ -113,16 +109,16 @@ function e($v) {
                             <?php endif; ?>
                         </td>
 
-                        <!-- Registered At -->
+
                         <td class="p-3 text-sm text-gray-600">
                             <?= date("d M Y", strtotime($ev["created_at"])) ?>
                         </td>
 
-                        <!-- Action -->
+                        
                         <td class="p-3">
                             <?php if ($ev["status"] === "Active"): ?>
 
-                                <!-- Deactivate -->
+  
                                 <a href="delete_evaluator.php?id=<?= $ev["evaluator_id"] ?>"
                                    onclick="return confirm(
                                        'Deactivate this evaluator?\n\n' +
@@ -134,7 +130,7 @@ function e($v) {
 
                             <?php else: ?>
 
-                                <!-- Restore -->
+
                                 <a href="restore_evaluator.php?id=<?= $ev["evaluator_id"] ?>"
                                    onclick="return confirm(
                                        'Restore this evaluator to Active status?\n\n' +
@@ -154,7 +150,7 @@ function e($v) {
         </table>
     </div>
 
-    <!-- Back -->
+
     <div class="mt-6">
         <a href="dashboard.php" class="text-blue-600 underline">
             ← Back to Admin Dashboard

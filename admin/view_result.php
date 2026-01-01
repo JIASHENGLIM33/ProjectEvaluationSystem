@@ -1,17 +1,12 @@
 <?php
-/*************************************************
- * admin/view_result.php
- * View Final Evaluation Result (Weighted)
- *************************************************/
+
 
 require_once __DIR__ . "/../config/auth_check.php";
 allow_role("admin");
 
 require_once __DIR__ . "/../config/config.php";
 
-/* =========================
-   Fuzzy Logic
-========================= */
+
 function calculateFuzzyScore(float $score): int {
     if ($score >= 85) return 95;
     if ($score >= 70) return 85;
@@ -20,17 +15,13 @@ function calculateFuzzyScore(float $score): int {
     return 40;
 }
 
-/* =========================
-   Get project_id
-========================= */
+
 $projectId = intval($_GET["project_id"] ?? 0);
 if ($projectId <= 0) {
     die("Invalid project ID.");
 }
 
-/* =========================
-   Fetch project info
-========================= */
+
 $stmt = $conn->prepare("
     SELECT 
         p.project_id,
@@ -50,9 +41,7 @@ if (!$project) {
     die("Project not found.");
 }
 
-/* =========================
-   Fetch evaluations + weight
-========================= */
+
 $stmt = $conn->prepare("
     SELECT
         e.score,
@@ -76,9 +65,7 @@ if (empty($evaluations)) {
     die("No evaluation data available for this project.");
 }
 
-/* =========================
-   Calculate final score
-========================= */
+
 $finalScore = 0;
 foreach ($evaluations as $ev) {
     $finalScore += ($ev["score"] * $ev["weight"]);
@@ -99,7 +86,7 @@ $finalFuzzy = calculateFuzzyScore($finalScore);
 
 <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow">
 
-<!-- ================= Project Info ================= -->
+
 <h1 class="text-2xl font-bold mb-2">Project Evaluation Result</h1>
 
 <p class="text-gray-700">
@@ -111,7 +98,6 @@ $finalFuzzy = calculateFuzzyScore($finalScore);
     Status: <?= htmlspecialchars($project["status"]) ?>
 </p>
 
-<!-- ================= Final Score ================= -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
     <div class="bg-blue-50 p-4 rounded-lg">
@@ -137,7 +123,7 @@ $finalFuzzy = calculateFuzzyScore($finalScore);
 
 </div>
 
-<!-- ================= Evaluator Details ================= -->
+
 <h2 class="text-xl font-semibold mb-4">Evaluator Breakdown</h2>
 
 <?php foreach ($evaluations as $ev): ?>

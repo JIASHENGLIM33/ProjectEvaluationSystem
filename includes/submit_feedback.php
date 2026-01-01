@@ -20,7 +20,7 @@ $strengths = $_POST['strengths'];
 $improvements = $_POST['improvements'];
 $comments = $_POST['comments'];
 
-// Fetch project
+
 $p = $conn->prepare("SELECT assigned_evaluators FROM projects WHERE id = ?");
 $p->bind_param("i", $project_id);
 $p->execute();
@@ -36,7 +36,6 @@ if (!in_array($evaluator_id, $assigned)) {
     die("You are not assigned to this project.");
 }
 
-// Check duplicate feedback
 $check = $conn->prepare("SELECT id FROM feedback WHERE evaluator_id = ? AND project_id = ?");
 $check->bind_param("ii", $evaluator_id, $project_id);
 $check->execute();
@@ -44,7 +43,7 @@ if ($check->get_result()->num_rows > 0) {
     die("You already submitted feedback.");
 }
 
-// Insert feedback
+
 $insert = $conn->prepare("
     INSERT INTO feedback (project_id, evaluator_id, technical_score, creativity_score, documentation_score, code_quality_score, overall_score, strengths, improvement_suggestions, overall_comments)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -56,14 +55,14 @@ $insert->bind_param("iiiiiiisss",
 );
 $insert->execute();
 
-// Check if all evaluators finished
+
 $done = $conn->prepare("SELECT COUNT(*) FROM feedback WHERE project_id = ?");
 $done->bind_param("i", $project_id);
 $done->execute();
 $count_done = $done->get_result()->fetch_row()[0];
 
 if ($count_done >= count($assigned)) {
-    // All evaluators finished → Mark Completed
+
     $conn->query("UPDATE projects SET status = 'Completed' WHERE id = $project_id");
 }
 

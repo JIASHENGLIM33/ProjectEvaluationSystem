@@ -7,25 +7,23 @@ require_once __DIR__ . "/../config/config.php";
 $evaluatorId   = $_SESSION["id"];
 $evaluatorName = $_SESSION["name"];
 
-/* =========================
-   Evaluator Statistics
-========================= */
 
-// 已评估项目数
+
+
 $totalEvaluated = $conn->query("
     SELECT COUNT(*) AS c
     FROM evaluation
     WHERE evaluator_id = $evaluatorId
 ")->fetch_assoc()["c"];
 
-// 平均分
+
 $avgScore = $conn->query("
     SELECT ROUND(AVG(score), 1) AS avg
     FROM evaluation
     WHERE evaluator_id = $evaluatorId
 ")->fetch_assoc()["avg"];
 
-// 待评估项目数
+
 $pending = $conn->query("
     SELECT COUNT(*) AS c
     FROM assignment a
@@ -34,9 +32,7 @@ $pending = $conn->query("
       AND p.status != 'Completed'
 ")->fetch_assoc()["c"];
 
-/* =========================
-   Evaluation History
-========================= */
+
 $history = $conn->query("
     SELECT 
         p.title,
@@ -50,9 +46,7 @@ $history = $conn->query("
     ORDER BY e.created_at DESC
 ")->fetch_all(MYSQLI_ASSOC);
 
-/* =========================
-   Assigned Projects
-========================= */
+
 $stmt = $conn->prepare("
     SELECT 
         p.project_id,
@@ -68,9 +62,7 @@ $stmt->bind_param("i", $evaluatorId);
 $stmt->execute();
 $projects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-/* =========================
-   Statistics
-========================= */
+
 $totalAssigned = count($projects);
 $underReview = 0;
 $completed   = 0;
@@ -154,7 +146,7 @@ foreach ($projects as $p) {
 
 
 
-    <!-- Assignment Stats -->
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="p-6 bg-white rounded-xl shadow">
             <p>Total Assigned</p>

@@ -4,16 +4,14 @@ require_once "../config/auth_check.php";
 
 allow_role("admin");
 
-/* =========================
-   1. 处理分配 Evaluator
-========================= */
+
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["assign"])) {
 
     $projectId   = intval($_POST["project_id"]);
     $evaluatorId = intval($_POST["evaluator_id"]);
     $adminId     = $_SESSION["id"];
 
-    // 防止重复分配
+
     $check = $conn->prepare("
         SELECT 1 FROM assignment
         WHERE project_id = ? AND evaluator_id = ?
@@ -23,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["assign"])) {
 
     if ($check->get_result()->num_rows === 0) {
 
-        // 插入 assignment
+
         $stmt = $conn->prepare("
             INSERT INTO assignment
                 (project_id, evaluator_id, assigned_by, assigned_date)
@@ -33,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["assign"])) {
         $stmt->bind_param("iii", $projectId, $evaluatorId, $adminId);
         $stmt->execute();
 
-        // 更新项目状态
+
         $conn->query("
             UPDATE project
             SET status = 'Under Review'
@@ -45,9 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["assign"])) {
     exit;
 }
 
-/* =========================
-   2. 删除项目
-========================= */
+
 if (isset($_GET["delete"])) {
     $id = intval($_GET["delete"]);
 
@@ -58,9 +54,7 @@ if (isset($_GET["delete"])) {
     exit;
 }
 
-/* =========================
-   3. 查询项目列表
-========================= */
+
 $projects = $conn->query("
     SELECT 
         p.project_id,
@@ -77,9 +71,7 @@ $projects = $conn->query("
     ORDER BY p.created_at DESC
 ");
 
-/* =========================
-   4. 获取 Evaluator 列表
-========================= */
+
 $evaluators = $conn->query("
     SELECT evaluator_id, name, expertise
     FROM evaluator
