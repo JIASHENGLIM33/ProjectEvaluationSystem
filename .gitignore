@@ -1,24 +1,14 @@
-# PHP / general
-/vendor/
-node_modules/
+# Ignore sensitive files
+.env
+config/config.php
+
+# Ignore uploads
+uploads/
+storage/
+
+# Ignore system files
 .DS_Store
 Thumbs.db
 
-# XAMPP / runtime
-uploads/
-*.log
-*.sqlite
-.env
-.env.local
-config.php
-db_connect.php
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-desktop.ini
-
-# Composer (if used)
-composer.lock
+# Ignore vendor (if any)
+vendor/

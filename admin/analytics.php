@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../db.php';
+include '../config/config.php';
 
 // 只有 admin 可以访问
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {

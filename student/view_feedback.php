@@ -1,79 +1,177 @@
 <?php
-session_start();
-require_once "../db_connect.php";
+/*************************************************
+ * student/view_feedback.php
+ * FINAL VERSION
+ *************************************************/
 
-if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== "student") {
-    header("Location: ../login.php");
-    exit();
+require_once __DIR__ . "/../config/auth_check.php";
+allow_role("student");
+
+require_once __DIR__ . "/../config/config.php";
+
+$studentId = $_SESSION["id"];
+
+/* =========================
+   1. 获取该学生的所有项目
+========================= */
+$stmt = $conn->prepare("
+    SELECT project_id, title, description, status
+    FROM project
+    WHERE student_id = ?
+    ORDER BY created_at DESC
+");
+$stmt->bind_param("i", $studentId);
+$stmt->execute();
+$projects = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+/* 默认选中第一个项目 */
+$selectedProjectId = $_GET["project_id"] ?? ($projects[0]["project_id"] ?? null);
+
+/* =========================
+   2. 获取该项目的评估结果（如果有）
+========================= */
+$feedback = null;
+
+if ($selectedProjectId) {
+    $stmt = $conn->prepare("
+        SELECT 
+            e.score,
+            e.fuzzy_score,
+            e.feedback,
+            e.rubric_json,
+            e.created_at,
+            ev.name AS evaluator_name
+        FROM evaluation e
+        JOIN evaluator ev ON e.evaluator_id = ev.evaluator_id
+        WHERE e.project_id = ?
+        LIMIT 1
+    ");
+    $stmt->bind_param("i", $selectedProjectId);
+    $stmt->execute();
+    $feedback = $stmt->get_result()->fetch_assoc();
 }
-
-$studentId = $_SESSION["user_id"];
-
-$sql = "
-    SELECT p.project_title, e.feedback, e.score, e.evaluator_id, e.submitted_at
-    FROM evaluations e
-    JOIN projects p ON e.project_id = p.id
-    WHERE p.student_id = '$studentId'
-";
-
-$result = mysqli_query($conn, $sql);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>View Feedback | Student</title>
-<link rel="stylesheet" href="../assets/css/style.css">
+<title>View Feedback</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
 
-<div class="dashboard-container">
+<body class="bg-gray-100 p-8">
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>Student</h2>
-        <a href="dashboard.php">📊 Dashboard</a>
-        <a href="submit_project.php">📝 Submit Project</a>
-        <a href="view_feedback.php" class="active">⭐ View Feedback</a>
-        <a href="../logout.php" class="logout-btn">Logout →</a>
-    </div>
+<div class="max-w-6xl mx-auto bg-white rounded-xl shadow p-6">
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <h2>View Evaluation Feedback</h2>
-        <p>Your project evaluation & reviewer comments</p>
+    <h1 class="text-2xl font-bold mb-6">Project Feedback</h1>
 
-        <div class="feedback-container">
+    <div class="grid grid-cols-3 gap-6">
 
-        <?php if (mysqli_num_rows($result) > 0) { ?>
-            <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-            
-            <div class="feedback-card">
-                <h3><?php echo $row["project_title"]; ?></h3>
+        <!-- ================= 左侧：项目列表 ================= -->
+        <div class="col-span-1 border-r pr-4">
+            <h3 class="font-semibold mb-3">Your Projects</h3>
 
-                <div class="feedback-score">
-                    ⭐ Score: <strong><?php echo $row["score"]; ?>/100</strong>
+            <?php if (empty($projects)): ?>
+                <p class="text-sm text-gray-500">No projects submitted yet.</p>
+            <?php endif; ?>
+
+            <?php foreach ($projects as $p): ?>
+                <a href="?project_id=<?= $p['project_id'] ?>">
+                    <div class="mb-3 p-3 rounded-lg border
+                        <?= $p['project_id'] == $selectedProjectId
+                            ? 'bg-blue-50 border-blue-500'
+                            : 'hover:bg-gray-50' ?>">
+                        
+                        <p class="font-medium text-gray-900">
+                            <?= htmlspecialchars($p['title']) ?>
+                        </p>
+
+                        <p class="text-sm text-gray-500 truncate">
+                            <?= htmlspecialchars($p['description']) ?>
+                        </p>
+
+                        <span class="inline-block mt-1 text-xs px-2 py-1 rounded
+                            <?= $p['status'] === 'Completed'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-yellow-100 text-yellow-700' ?>">
+                            <?= $p['status'] ?>
+                        </span>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- ================= 右侧：Feedback ================= -->
+        <div class="col-span-2 pl-4">
+
+            <?php if (!$selectedProjectId): ?>
+
+                <p class="text-gray-500">No project selected.</p>
+
+            <?php elseif (!$feedback): ?>
+
+                <div class="p-6 bg-yellow-50 border border-yellow-200 rounded">
+                    <h3 class="font-semibold text-yellow-800">Evaluation Pending</h3>
+                    <p class="text-sm text-yellow-700 mt-2">
+                        Your project has not been evaluated yet.
+                    </p>
                 </div>
 
-                <p><strong>Reviewer:</strong> <?php echo $row["evaluator_id"]; ?></p>
-                <p><strong>Feedback Date:</strong> <?php echo $row["submitted_at"]; ?></p>
+            <?php else: ?>
 
-                <div class="feedback-box">
-                    <?php echo nl2br($row["feedback"]); ?>
+                <?php
+                $rubric = json_decode($feedback["rubric_json"], true);
+                ?>
+
+                <div class="space-y-5">
+
+                    <!-- Summary -->
+                    <div class="p-4 bg-gray-50 rounded">
+                        <p><strong>Evaluator:</strong>
+                            <?= htmlspecialchars($feedback['evaluator_name']) ?>
+                        </p>
+                        <p><strong>Final Score:</strong>
+                            <?= $feedback['score'] ?> / 100
+                        </p>
+                    
+                        <p class="text-sm text-gray-500">
+                            Evaluated on <?= date("d/m/Y", strtotime($feedback['created_at'])) ?>
+                        </p>
+                    </div>
+
+                    <!-- Rubric -->
+                    <div class="p-4 bg-white border rounded">
+                        <h3 class="font-semibold mb-2">Rubric Breakdown</h3>
+                        <ul class="list-disc pl-6 text-gray-700">
+                            <?php foreach ($rubric as $k => $v): ?>
+                                <li><?= ucfirst($k) ?>: <?= $v ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+
+                    <!-- Feedback -->
+                    <div class="p-4 bg-white border rounded">
+                        <h3 class="font-semibold mb-2">Evaluator Feedback</h3>
+                        <p class="text-gray-700">
+                            <?= nl2br(htmlspecialchars($feedback['feedback'])) ?>
+                        </p>
+                    </div>
+
                 </div>
-            </div>
 
-            <?php } ?>
-
-        <?php } else { ?>
-            <p class="no-feedback">❌ No feedback yet. Your project is still under review.</p>
-        <?php } ?>
+            <?php endif; ?>
 
         </div>
+
     </div>
+
+    <div class="mt-6">
+        <a href="dashboard.php" class="text-blue-600 underline">
+            ← Back to Dashboard
+        </a>
+    </div>
+
 </div>
 
 </body>
 </html>
-

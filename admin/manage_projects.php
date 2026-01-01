@@ -1,127 +1,195 @@
 <?php
-session_start();
-include '../db.php';
+require_once "../config/config.php";
+require_once "../config/auth_check.php";
 
-// ✅ Only admin can access
-if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../index.php");
-    exit();
-}
+allow_role("admin");
 
-// ✅ Assign evaluator
-if (isset($_POST["assignEvaluator"])) {
-    $projectID = $_POST["project_id"];
-    $evaluator = $_POST["assigned_evaluator"];
+/* =========================
+   1. 处理分配 Evaluator
+========================= */
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["assign"])) {
 
-    mysqli_query($conn, "UPDATE projects SET assigned_evaluator = '$evaluator', status='Under Review' WHERE id='$projectID'");
+    $projectId   = intval($_POST["project_id"]);
+    $evaluatorId = intval($_POST["evaluator_id"]);
+    $adminId     = $_SESSION["id"];
+
+    // 防止重复分配
+    $check = $conn->prepare("
+        SELECT 1 FROM assignment
+        WHERE project_id = ? AND evaluator_id = ?
+    ");
+    $check->bind_param("ii", $projectId, $evaluatorId);
+    $check->execute();
+
+    if ($check->get_result()->num_rows === 0) {
+
+        // 插入 assignment
+        $stmt = $conn->prepare("
+            INSERT INTO assignment
+                (project_id, evaluator_id, assigned_by, assigned_date)
+            VALUES
+                (?, ?, ?, NOW())
+        ");
+        $stmt->bind_param("iii", $projectId, $evaluatorId, $adminId);
+        $stmt->execute();
+
+        // 更新项目状态
+        $conn->query("
+            UPDATE project
+            SET status = 'Under Review'
+            WHERE project_id = $projectId
+        ");
+    }
+
     header("Location: manage_projects.php");
-    exit();
+    exit;
 }
 
-// ✅ Delete project
+/* =========================
+   2. 删除项目
+========================= */
 if (isset($_GET["delete"])) {
-    $id = $_GET["delete"];
-    mysqli_query($conn, "DELETE FROM projects WHERE id='$id'");
+    $id = intval($_GET["delete"]);
+
+    $conn->query("DELETE FROM assignment WHERE project_id = $id");
+    $conn->query("DELETE FROM project WHERE project_id = $id");
+
     header("Location: manage_projects.php");
-    exit();
+    exit;
 }
 
-// ✅ Search filter
-$filter = "";
-if (isset($_GET['search']) && $_GET['search'] !== "") {
-    $search = $_GET['search'];
-    $filter = "WHERE p.project_title LIKE '%$search%' 
-               OR u.username LIKE '%$search%' 
-               OR p.status LIKE '%$search%'";
-}
-
-// ✅ Fetch projects
-$projects = mysqli_query($conn, "
-    SELECT p.*, u.username AS student_name,
-          (SELECT username FROM users WHERE id = p.assigned_evaluator) AS evaluator_name
-    FROM projects p
-    JOIN users u ON p.student_id = u.id
-    $filter
+/* =========================
+   3. 查询项目列表
+========================= */
+$projects = $conn->query("
+    SELECT 
+        p.project_id,
+        p.title,
+        p.status,
+        p.created_at,
+        s.name AS student_name,
+        GROUP_CONCAT(e.name SEPARATOR ', ') AS evaluators
+    FROM project p
+    JOIN student s ON p.student_id = s.student_id
+    LEFT JOIN assignment a ON p.project_id = a.project_id
+    LEFT JOIN evaluator e ON a.evaluator_id = e.evaluator_id
+    GROUP BY p.project_id
+    ORDER BY p.created_at DESC
 ");
 
-// ✅ Fetch evaluators
-$evaluators = mysqli_query($conn, "SELECT * FROM users WHERE role = 'evaluator'");
+/* =========================
+   4. 获取 Evaluator 列表
+========================= */
+$evaluators = $conn->query("
+    SELECT evaluator_id, name, expertise
+    FROM evaluator
+    ORDER BY name
+");
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Manage Projects</title>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+<meta charset="UTF-8">
+<title>Manage Projects</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
 
-<div class="sidebar">
-    <h2>Admin Panel</h2>
-    <a href="dashboard.php">🏠 Dashboard</a>
-    <a href="manage_users.php">👨‍🎓 Manage Users</a>
-    <a href="manage_projects.php" class="active">📁 Manage Projects</a>
-    <a href="../logout.php">🚪 Logout</a>
-</div>
+<body class="bg-gray-100">
 
-<div class="content">
-    <h1>Manage Projects</h1>
+<div class="max-w-7xl mx-auto mt-10 bg-white p-6 rounded-xl shadow">
 
-    <!-- ✅ Search Box -->
-    <form method="GET" class="search-box">
-        <input type="text" name="search" placeholder="🔍 Search project..."
-               value="<?= isset($_GET['search']) ? $_GET['search'] : '' ?>">
-    </form>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Project Management</h1>
+        <a href="dashboard.php" class="text-blue-600 underline">
+            ← Back to Admin Dashboard
+        </a>
+    </div>
 
-    <table class="styled-table">
-        <tr>
-            <th>ID</th>
-            <th>Project Title</th>
-            <th>Student</th>
-            <th>Assigned Evaluator</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-gray-100 text-left">
+                <th class="p-3">Project</th>
+                <th class="p-3">Student</th>
+                <th class="p-3">Evaluator(s)</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Assign Evaluator</th>
+                <th class="p-3">Action</th>
+            </tr>
+        </thead>
 
-        <?php while ($row = mysqli_fetch_assoc($projects)): ?>
-        <tr>
-            <td><?= $row["id"]; ?></td>
-            <td><?= $row["project_title"]; ?></td>
-            <td><?= $row["student_name"]; ?></td>
+        <tbody>
+        <?php if ($projects->num_rows === 0): ?>
+            <tr>
+                <td colspan="6" class="p-6 text-center text-gray-500">
+                    No projects found.
+                </td>
+            </tr>
+        <?php endif; ?>
 
-            <!-- assign evaluator dropdown -->
-            <td>
-                <form method="POST">
-                    <input type="hidden" name="project_id" value="<?= $row["id"]; ?>">
+        <?php while ($p = $projects->fetch_assoc()): ?>
+            <tr class="border-b">
+                <td class="p-3 font-medium">
+                    <?= htmlspecialchars($p["title"]) ?>
+                </td>
 
-                    <select name="assigned_evaluator" required>
-                        <option value="">--Select--</option>
+                <td class="p-3">
+                    <?= htmlspecialchars($p["student_name"]) ?>
+                </td>
 
-                        <?php mysqli_data_seek($evaluators, 0); ?>
-                        <?php while ($eva = mysqli_fetch_assoc($evaluators)): ?>
-                        <option value="<?= $eva["id"] ?>" 
-                            <?= ($row["assigned_evaluator"] == $eva["id"]) ? "selected" : "" ?>>
-                            <?= $eva["username"]; ?>
-                        </option>
-                        <?php endwhile; ?>
-                    </select>
+                <td class="p-3 text-sm text-gray-700">
+                    <?= $p["evaluators"] ?: "—" ?>
+                </td>
 
-                    <button type="submit" name="assignEvaluator">Assign</button>
-                </form>
-            </td>
+                <td class="p-3">
+                    <span class="px-3 py-1 rounded-full text-sm
+                        <?= $p["status"] === "Completed"
+                            ? "bg-green-100 text-green-700"
+                            : ($p["status"] === "Under Review"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-yellow-100 text-yellow-700") ?>">
+                        <?= $p["status"] ?>
+                    </span>
+                </td>
 
-            <td><?= $row["status"]; ?></td>
+                <!-- Assign Evaluator -->
+                <td class="p-3">
+                    <form method="POST" class="flex gap-2">
+                        <input type="hidden" name="project_id" value="<?= $p["project_id"] ?>">
 
-            <td>
-                <a href="manage_projects.php?delete=<?= $row['id']; ?>"
-                   onclick="return confirm('Confirm delete project?')"
-                   class="btn-danger">Delete</a>
-            </td>
-        </tr>
+                        <select name="evaluator_id"
+                                class="border rounded px-2 py-1 text-sm" required>
+                            <option value="">Select</option>
+                            <?php mysqli_data_seek($evaluators, 0); ?>
+                            <?php while ($ev = $evaluators->fetch_assoc()): ?>
+                                <option value="<?= $ev["evaluator_id"] ?>">
+                                    <?= htmlspecialchars($ev["name"]) ?>
+                                    (<?= htmlspecialchars($ev["expertise"] ?? "N/A") ?>)
+                                </option>
+
+                            <?php endwhile; ?>
+                        </select>
+
+                        <button name="assign"
+                                class="px-3 py-1 bg-blue-600 text-white rounded text-sm">
+                            Assign
+                        </button>
+                    </form>
+                </td>
+
+                <td class="p-3">
+                    <a href="?delete=<?= $p["project_id"] ?>"
+                       onclick="return confirm('Delete this project?')"
+                       class="px-3 py-1 bg-red-600 text-white rounded text-sm">
+                        Delete
+                    </a>
+                </td>
+            </tr>
         <?php endwhile; ?>
-
+        </tbody>
     </table>
+
 </div>
 
 </body>

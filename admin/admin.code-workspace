@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../assets"
+		},
+		{
+			"path": "../evaluator"
+		},
+		{
+			"path": "../includes"
+		},
+		{
+			"path": "../js"
+		},
+		{
+			"path": "../student"
+		},
+		{
+			"path": "../uploads"
+		}
+	]
+}
